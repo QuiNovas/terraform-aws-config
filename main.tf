@@ -41,7 +41,7 @@ resource "aws_iam_role_policy_attachment" "config" {
 }
 
 resource "aws_config_configuration_recorder" "config" {
-  name      = "${var.account_name}"
+  name      = "${var.name}"
   recording_group {
     include_global_resource_types = true
   }
@@ -56,10 +56,10 @@ resource "aws_config_delivery_channel" "config" {
   depends_on      = [
     "aws_config_configuration_recorder.config"
   ]
-  name            = "${var.account_name}"
+  name            = "${var.name}"
   s3_bucket_name  = "${aws_s3_bucket.config.id}"
   snapshot_delivery_properties {
-    delivery_frequency = "TwentyFour_Hours"
+    delivery_frequency = "${var.delivery_frequency}"
   }
   sns_topic_arn   = "${aws_sns_topic.config.arn}"
 }
@@ -68,6 +68,20 @@ resource "aws_config_configuration_recorder_status" "config" {
   depends_on  = [
     "aws_config_delivery_channel.config"
   ]
-  is_enabled  = true
+  is_enabled  = "${var.enable_recorder}"
   name        = "${aws_config_configuration_recorder.config.name}"
+}
+
+resource "aws_config_config_rule" "rule" {
+  count             = "${var.rules_count}"
+  depends_on        = [
+    "aws_config_configuration_recorder.config"
+  ]
+  input_parameters  = "${lookup(var.input_parameters, element(var.rules, count.index), "")}"
+  name              = "${element(var.rules, count.index)}"
+#  scope             = ["${local.scopes[contains(keys(local.scopes), element(var.rules, count.index)) ? element(var.rules, count.index) : local.default_scope_key]}"]
+  source {
+    owner             = "AWS"
+    source_identifier = "${lookup(local.source_identifiers, element(var.rules, count.index))}"
+  }
 }

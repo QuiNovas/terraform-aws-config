@@ -25,6 +25,7 @@ resource "aws_s3_bucket" "config" {
     target_bucket = "${var.log_bucket}"
     target_prefix = "s3/${local.config_name}/"
   }
+  tags = "${var.tags}"
 }
 
 data "aws_iam_policy_document" "config" {
