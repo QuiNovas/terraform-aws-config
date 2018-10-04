@@ -2,9 +2,12 @@ resource "aws_s3_bucket" "config" {
   acl     = "log-delivery-write"
   bucket  = "${local.config_name}"
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   lifecycle_rule {
     id = "log"
-    prefix = "/"
     enabled = true
 
     transition {
@@ -15,10 +18,6 @@ resource "aws_s3_bucket" "config" {
     expiration {
       days = 2555
     }
-  }
-
-  lifecycle {
-    prevent_destroy = true
   }
 
   logging {
