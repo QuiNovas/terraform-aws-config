@@ -7,7 +7,7 @@ variable "delivery_frequency" {
 variable "enable_recorder" {
   default     = true
   description = "Whether the configuration recorder should be enabled or disabled."
-  type        = number
+  type        = bool
 }
 
 variable "expiration" {
