@@ -27,6 +27,15 @@ data "aws_iam_policy_document" "role_policy" {
       "${aws_s3_bucket.config.arn}/*",
     ]
   }
+
+  statement {
+    actions = [
+      "sns:Publish",
+    ]
+    resources = [
+      aws_sns_topic.config.arn
+    ]
+  }
 }
 
 resource "aws_iam_role_policy" "config" {
