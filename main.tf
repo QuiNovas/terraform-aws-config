@@ -15,6 +15,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
 resource "aws_iam_role" "config_role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
   name               = local.config_name
+  tags               = var.tags
 }
 
 data "aws_iam_policy_document" "role_policy" {
@@ -59,6 +60,7 @@ resource "aws_config_configuration_recorder" "config" {
 
 resource "aws_sns_topic" "config" {
   name = local.config_name
+  tags = var.tags
 }
 
 resource "aws_config_delivery_channel" "config" {
@@ -88,5 +90,7 @@ resource "aws_config_config_rule" "rule" {
     owner             = "AWS"
     source_identifier = local.source_identifiers[element(var.rules, count.index)]
   }
+
+  tags = var.tags
 }
 
