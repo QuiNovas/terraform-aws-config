@@ -1,30 +1,41 @@
 resource "aws_s3_bucket" "config" {
-  acl    = "log-delivery-write"
   bucket = local.config_name
 
   lifecycle {
     prevent_destroy = true
   }
+  
+  tags = var.tags
+}
 
-  lifecycle_rule {
-    id      = "log"
-    enabled = true
+resource "aws_s3_bucket_logging" "config" {
+  bucket = aws_s3_bucket.config.id
+
+  target_bucket = var.log_bucket
+  target_prefix = "s3/${local.config_name}/"
+}
+
+resource "aws_s3_bucket_acl" "config" {
+  bucket = aws_s3_bucket.config.id
+  acl    = "log-delivery-write"
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "config" {
+  bucket = aws_s3_bucket.config.bucket
+  rule {
+    id = "log"
+
+    expiration {
+      days = var.expiration
+    }
+
+    status = "Enabled"
 
     transition {
       days          = var.transition_to_glacier
       storage_class = "GLACIER"
     }
-
-    expiration {
-      days = var.expiration
-    }
   }
-
-  logging {
-    target_bucket = var.log_bucket
-    target_prefix = "s3/${local.config_name}/"
-  }
-  tags = var.tags
 }
 
 data "aws_iam_policy_document" "config" {
