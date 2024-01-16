@@ -15,11 +15,6 @@ resource "aws_s3_bucket_logging" "config" {
   target_prefix = "s3/${local.config_name}/"
 }
 
-resource "aws_s3_bucket_acl" "config" {
-  bucket = aws_s3_bucket.config.id
-  acl    = "log-delivery-write"
-}
-
 resource "aws_s3_bucket_lifecycle_configuration" "config" {
   bucket = aws_s3_bucket.config.bucket
   rule {
